@@ -1,0 +1,6 @@
+# Generated .gitignore patterns
+
+# Node.js
+node_modules/
+dist/
+.env

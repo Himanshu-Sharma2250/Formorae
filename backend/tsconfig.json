@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "nodenext",
+        "esModuleInterop": true,
+        "target": "es6",
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "moduleResolution": "nodenext"
+    },
+    "include": ["src/**/*.ts"],
+    "ts-node": {
+        "esm": true,
+        "experimentalSpecifierResolution": "node"
+    }
+}
