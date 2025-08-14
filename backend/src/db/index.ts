@@ -5,8 +5,10 @@ dotenv.config({
     path: "./.env"
 })
 
+const db_uri: any = process.env.MONGODB_URI;
+
 const db = () => {
-    mongoose.connect(process.env.MONGODB_URI)
+    mongoose.connect(db_uri)
         .then(() => {
             console.log("connect to database")
         })

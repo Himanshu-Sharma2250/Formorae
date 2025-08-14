@@ -1,7 +1,8 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose, {Schema, Document} from "mongoose";
 import bcrypt from "bcryptjs";
+import crypto from "crypto"
 
-import { availableUserRoles, UserRolesEnum } from "../../constant.js";
+import { availableUserRoles, USER_TEMPORARY_TOKEN_EXPIRY, UserRolesEnum } from "../../constant.js";
 
 const userSchema = new Schema(
     {
@@ -53,8 +54,42 @@ userSchema.pre("save", async function(next) {
     if (this.isModified("password")) {
         this.password = await bcrypt.hash(this.password, 10);
     }
-    
-    next();
-})
 
-export const User = mongoose.model("User", userSchema);
+    next();
+});
+
+interface IUserDocument extends Document {
+    name: string,
+    email: string,
+    password: string,
+    isVerified: boolean,
+    role: string,
+    refreshToken: string,
+    forgotPasswordExpiry: number,
+    emailVerificationToken: string,
+    emailVerificationExpiry: number,
+
+    generateTemporaryToken(): {
+        unHashedToken: string
+        hashedToken: string 
+        tokenExpiry: number
+    }
+}
+
+userSchema.methods.generateTemporaryToken = function () {
+    // This token should be client facing
+    // for example: for email verification unHashedToken should go into the user's mail
+    const unHashedToken = crypto.randomBytes(20).toString("hex");
+
+    // This should stay in the DB to compare at the time of verification
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(unHashedToken)
+        .digest("hex");
+    // This is the expiry time for the token (20 minutes)
+    const tokenExpiry = Date.now() + USER_TEMPORARY_TOKEN_EXPIRY;
+
+    return { unHashedToken, hashedToken, tokenExpiry };
+};
+
+export const User = mongoose.model<IUserDocument>("User", userSchema);

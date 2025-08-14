@@ -5,7 +5,8 @@
         "target": "es6",
         "rootDir": "./src",
         "outDir": "./dist",
-        "moduleResolution": "nodenext"
+        "moduleResolution": "nodenext",
+        "strict": true
     },
     "include": ["src/**/*.ts"],
     "ts-node": {
