@@ -66,8 +66,8 @@ interface IUserDocument extends Document {
     role: string,
     refreshToken: string,
     forgotPasswordExpiry: number,
-    emailVerificationToken: string,
-    emailVerificationExpiry: number,
+    emailVerificationToken: string | undefined,
+    emailVerificationExpiry: number | undefined,
 
     generateTemporaryToken(): {
         unHashedToken: string

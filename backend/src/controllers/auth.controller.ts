@@ -5,6 +5,7 @@ import { User } from "../models/auth/index.js";
 
 import { registerUserSchema } from "../validators/auth.validator.js"
 import { emailVerificationMailgenContent, sendEmail } from "../utils/mail.js";
+import bcrypt from "bcryptjs";
 
 export const registerUser = async (req: Request, res: Response) => {
     const {data, error} = registerUserSchema.safeParse(req.body);
@@ -78,3 +79,49 @@ export const registerUser = async (req: Request, res: Response) => {
         })   
     }
 }
+
+export const verifyEmail = async function(req: Request, res: Response) {
+    // get the unhashed token from the user's params
+    // check if the hashed token we stored is the same after hashing the token
+    const {unHashedToken} = req.params;
+
+    try {
+        // convert the unhashed token in hashed token
+        const hashedToken = crypto
+            .createHash("sha256")
+            .update(unHashedToken)
+            .digest("hex");
+
+        const user = await User.findOne({
+            emailVerificationToken: hashedToken,
+            emailVerificationExpiry: {
+                $gt: Date.now()
+            }
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or expired verification token"
+            })
+        }
+
+        user.emailVerificationToken = undefined;
+        user.emailVerificationExpiry = undefined;
+        user.isVerified = true;
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "User's email verified"
+        })
+    } catch (error) {
+        console.error("Error in verifying the User's email: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error in Verifying the User's email"
+        })
+    }
+};
+
