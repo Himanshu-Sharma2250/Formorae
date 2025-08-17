@@ -200,3 +200,42 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 };
 
+export const logoutUser = async (req:Request, res:Response) => {
+    // just clear the tokens stored in the cookie
+    try {
+        
+
+        await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $set: {
+                    refreshToken: "",
+                }
+            }, 
+            {new: true}
+        )
+
+        interface optionType {
+            httpOnly: boolean
+            maxAge: number
+            secure: boolean
+        }
+
+        const cookieOption: optionType = {
+            httpOnly: true,
+            maxAge: 1000 * 60 * 60 * 24,
+            secure: process.env.NODE_ENV === "production"
+        }
+
+        res.status(200)
+            .clearCookie("AccessToken", cookieOption)
+            .clearCookie("RefreshToken", cookieOption)
+            .json({
+                success: true,
+                message: "User logged out successfully", 
+            })
+    } catch (error) {
+        
+    }
+}
+
