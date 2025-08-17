@@ -1,8 +1,10 @@
 import mongoose, {Schema, Document} from "mongoose";
 import bcrypt from "bcryptjs";
-import crypto from "crypto"
+import crypto from "crypto";
+import jwt from "jsonwebtoken"
 
 import { availableUserRoles, USER_TEMPORARY_TOKEN_EXPIRY, UserRolesEnum } from "../../constant.js";
+import { string } from "zod";
 
 const userSchema = new Schema(
     {
@@ -74,7 +76,32 @@ interface IUserDocument extends Document {
         hashedToken: string 
         tokenExpiry: number
     }
+
+    generateAccessToken(): any
+
+    generateRefreshToken(): any
 }
+
+userSchema.methods.generateAccessToken = function() {
+    return jwt.sign(
+        {
+        _id: this._id,
+        name: this.name,
+        email: this.email,
+        role: this.role
+        },
+        process.env.ACCESS_TOKEN_SECRET as string,
+        { expiresIn: 1000 * 60 * 60 }
+    );
+};
+
+userSchema.methods.generateRefreshToken = function() {
+  return jwt.sign(
+    { _id: this._id },
+    process.env.REFRESH_TOKEN_SECRET as string,
+    { expiresIn: 1000 * 60 * 60 * 24 }
+  );
+};
 
 userSchema.methods.generateTemporaryToken = function () {
     // This token should be client facing
