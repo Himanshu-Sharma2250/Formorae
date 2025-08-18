@@ -4,8 +4,8 @@ import jwt from "jsonwebtoken";
 
 import { User } from "../models/auth/index.js";
 
-import { loginUserSchema, registerUserSchema } from "../validators/auth.validator.js"
-import { emailVerificationMailgenContent, sendEmail } from "../utils/mail.js";
+import { forgotPasswordSchema, loginUserSchema, registerUserSchema, resetPasswordSchema } from "../validators/auth.validator.js"
+import { emailVerificationMailgenContent, forgotPasswordMailgenContent, sendEmail } from "../utils/mail.js";
 import bcrypt from "bcryptjs";
 
 export const registerUser = async (req: Request, res: Response) => {
@@ -49,7 +49,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
         sendEmail({
             email: user?.email,
-            subject: "",
+            subject: "Verify Your Email",
             mailgenContent: emailVerificationMailgenContent(
                 user.name,
                 `${process.env.BASE_URL}/api/v1/auth/verify-email/${unHashedToken}`
@@ -84,13 +84,13 @@ export const registerUser = async (req: Request, res: Response) => {
 export const verifyEmail = async function(req: Request, res: Response) {
     // get the unhashed token from the user's params
     // check if the hashed token we stored is the same after hashing the token
-    const {unHashedToken} = req.params;
+    const {token} = req.params;
 
     try {
         // convert the unhashed token in hashed token
         const hashedToken = crypto
             .createHash("sha256")
-            .update(unHashedToken)
+            .update(token)
             .digest("hex");
 
         const user = await User.findOne({
@@ -203,10 +203,8 @@ export const loginUser = async (req: Request, res: Response) => {
 export const logoutUser = async (req:Request, res:Response) => {
     // just clear the tokens stored in the cookie
     try {
-        
-
         await User.findByIdAndUpdate(
-            req.user._id,
+            req.user?._id,
             {
                 $set: {
                     refreshToken: "",
@@ -239,3 +237,121 @@ export const logoutUser = async (req:Request, res:Response) => {
     }
 }
 
+export const forgotPassword = async (req:Request, res:Response) => {
+    // get the email from the user and get the user 
+    // send the email to the user
+    const {data, error} = forgotPasswordSchema.safeParse(req.body);
+
+    if (error) {
+        console.error("Error in safeParse: ", error);
+        return res.status(400).json({
+            success: false,
+            message: "Error in safeParse of zod"
+        })
+    }
+
+    const {email} = data;
+
+    try {
+        const user = await User.findOne({email});
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Incorrect Email"
+            })
+        }
+
+        const {unHashedToken, hashedToken, tokenExpiry} = user.generateTemporaryToken();
+
+        user.forgotPasswordToken = hashedToken;
+        user.forgotPasswordExpiry = tokenExpiry;
+
+        await user.save();
+
+        sendEmail({
+            email: user?.email,
+            subject: "Reset Your Password",
+            mailgenContent: forgotPasswordMailgenContent(
+                user.name,
+                `${process.env.BASE_URL}/api/v1/auth/reset-password/${unHashedToken}`
+            )
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "reset password email send"
+        })
+    } catch (error) {
+        console.error("Error in forgot password: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error in forgotPassword"
+        })
+    }
+};
+
+export const resetForgottenPassword = async (req: Request, res: Response) => {
+    // get the token from the params
+    // check if the token is correct or not
+    // get the passwords from the user 
+    const {token} = req.params;
+    const {data, error} = resetPasswordSchema.safeParse(req.body);
+
+    if (error) {
+        console.error("Error in safeParse: ", error);
+        return res.status(400).json({
+            success: false,
+            message: "Error in safeParse of zod"
+        })
+    }
+
+    const {newPassword, confirmPassword} = data;
+
+    if (newPassword !== confirmPassword) {
+        return res.status(400).json({
+            success: false,
+            message: "Confirm Password must be same a new Password"
+        })
+    }
+
+    try {
+        const hashedToken = crypto
+            .createHash("sha256")
+            .update(token)
+            .digest("hex");
+
+        const user = await User.findOne({
+            forgotPasswordToken: hashedToken,
+            forgotPasswordExpiry: {
+                $gt: Date.now()
+            }
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or expired verification token"
+            })
+        }
+
+        user.forgotPasswordToken = undefined;
+        user.forgotPasswordExpiry = undefined;
+
+        user.password = newPassword;
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "User's Password resetted successfully",
+            user
+        })
+    } catch (error) {
+        console.error("Error in reseting password: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error in reseting password"
+        })
+    }
+}

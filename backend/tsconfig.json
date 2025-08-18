@@ -3,6 +3,7 @@
         "module": "nodenext",
         "esModuleInterop": true,
         "target": "es6",
+        "typeRoots" : ["./src/types", "./node_modules/@types"],
         "rootDir": "./src",
         "outDir": "./dist",
         "moduleResolution": "nodenext",

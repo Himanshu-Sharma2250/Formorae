@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 
 import db from "./db/index.js";
+import authRouter from "./routes/auth.router.js";
 
 dotenv.config({
     path: ".env"
@@ -22,3 +23,5 @@ db();
 app.listen(PORT, () => {
     console.log(`Server is listening at ${PORT}`)
 })
+
+app.use("/api/v1/auth/", authRouter);

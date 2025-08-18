@@ -22,3 +22,20 @@ export const loginUserSchema = z.object({
         .min(8, "Length of password should be atleast 8 characters")
         .max(13, "Length of password must not exceed 13 characters")
 });
+
+export const forgotPasswordSchema = z.object({
+    email: z
+        .email()
+        .trim()
+})
+
+export const resetPasswordSchema = z.object({
+    newPassword: z
+        .string()
+        .min(8, "Length of password should be atleast 8 characters")
+        .max(13, "Length of password must not exceed 13 characters"),
+    confirmPassword: z
+        .string()
+        .min(8, "Length of password should be atleast 8 characters")
+        .max(13, "Length of password must not exceed 13 characters")
+})

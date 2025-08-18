@@ -67,7 +67,8 @@ interface IUserDocument extends Document {
     isVerified: boolean,
     role: string,
     refreshToken: string,
-    forgotPasswordExpiry: number,
+    forgotPasswordToken: string | undefined
+    forgotPasswordExpiry: number | undefined
     emailVerificationToken: string | undefined,
     emailVerificationExpiry: number | undefined,
 

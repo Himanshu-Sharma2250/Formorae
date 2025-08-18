@@ -2,6 +2,10 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken"
 import { User } from "../models/auth/index.js";
 
+interface JwtPayload {
+    _id: string;
+}
+
 export const verifyJWT = async (req:Request, res: Response, next: NextFunction) => {
     // get the token from the cookie and then verify it 
     // get the user and the assign the user to req.user
@@ -15,7 +19,7 @@ export const verifyJWT = async (req:Request, res: Response, next: NextFunction) 
     }
 
     try {
-        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string);
+        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
 
         const user = await User.findById(decodedToken?._id).select(
             "-password -refreshToken -emailVerificationToken, -emailVerificationExpiry"
