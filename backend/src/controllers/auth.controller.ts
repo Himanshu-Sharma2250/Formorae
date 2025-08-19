@@ -1,6 +1,11 @@
 import { Request, Response } from "express"
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv"
+
+dotenv.config({
+    path: "./.env"
+})
 
 import { User } from "../models/auth/index.js";
 
@@ -171,6 +176,16 @@ export const loginUser = async (req: Request, res: Response) => {
             "-password -refreshToken -emailVerificationToken -emailVerificationExpiry"
         );
 
+        if (!loggedUser) {
+            return res.status(400).json({
+                success: false,
+                message: "User not logged in"
+            })
+        }
+
+        user.refreshToken = refreshToken;
+        await user.save();
+
         interface optionType {
             httpOnly: boolean
             maxAge: number
@@ -264,8 +279,10 @@ export const forgotPassword = async (req:Request, res:Response) => {
 
         const {unHashedToken, hashedToken, tokenExpiry} = user.generateTemporaryToken();
 
-        user.forgotPasswordToken = hashedToken;
-        user.forgotPasswordExpiry = tokenExpiry;
+        user.forgetPasswordToken = hashedToken;
+        user.forgetPasswordExpiry = tokenExpiry;
+
+        console.log("Hashed token stored in db : ", hashedToken);
 
         await user.save();
 
@@ -320,23 +337,27 @@ export const resetForgottenPassword = async (req: Request, res: Response) => {
             .createHash("sha256")
             .update(token)
             .digest("hex");
+        
+        console.log("hashed token in reset password : ", hashedToken);
 
         const user = await User.findOne({
-            forgotPasswordToken: hashedToken,
-            forgotPasswordExpiry: {
+            forgetPasswordToken: hashedToken,
+            forgetPasswordExpiry: {
                 $gt: Date.now()
             }
         });
 
+        console.log("User : ", user)
+
         if (!user) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid or expired verification token"
+                message: "Invalid or expired reset token"
             })
         }
 
-        user.forgotPasswordToken = undefined;
-        user.forgotPasswordExpiry = undefined;
+        user.forgetPasswordToken = undefined;
+        user.forgetPasswordExpiry = undefined;
 
         user.password = newPassword;
 
@@ -352,6 +373,150 @@ export const resetForgottenPassword = async (req: Request, res: Response) => {
         res.status(500).json({
             success: false,
             message: "Error in reseting password"
+        })
+    }
+}
+
+export const getProfile = async (req: Request, res:Response) => {
+    try {
+        const user = await User.findById(req.user?._id);
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Please Login"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "User's Profile",
+            user
+        })
+    } catch (error) {
+        console.error("Error getting User's Profile: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error getting User's Profile"
+        })
+    }
+}
+
+export const resendEmailVerification = async (req:Request, res:Response) => {
+    try {
+        const user = await User.findById(req.user?._id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User do not exist"
+            })
+        }
+
+        if (user.isVerified) {
+            return res.status(409).json({
+                success: false,
+                message: "User already verified"
+            })
+        }
+
+        const {unHashedToken, hashedToken, tokenExpiry} = user.generateTemporaryToken();
+
+        user.emailVerificationToken = hashedToken;
+        user.emailVerificationExpiry = tokenExpiry;
+
+        await user.save();
+
+        sendEmail({
+            email: user?.email,
+            subject: "Verify Your Email",
+            mailgenContent: emailVerificationMailgenContent(
+                user.name,
+                `${process.env.BASE_URL}/api/v1/auth/verify-email/${unHashedToken}`
+            )
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Email send to your Id"
+        })
+    } catch (error) {
+        console.error("Error re-sending email: ", error)
+        res.status(500).json({
+            success: false,
+            message: "Error re-sending email"
+        })
+    }
+}
+
+interface JwtPayload {
+    _id: string;
+}
+
+export const refreshAccessToken = async (req:Request, res:Response) => {
+    const inCommingRefreshToken = req.cookies?.RefreshToken || req.body.RefreshToken;
+
+    if (!inCommingRefreshToken) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized request"
+        })
+    }
+
+    try {
+        const decodedToken = jwt.verify(inCommingRefreshToken, process.env.REFRESH_TOKEN_SECRET as string) as JwtPayload;
+
+        const user = await User.findById(decodedToken?._id);
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid refresh token"
+            })
+        }
+
+        // check if incoming refresh token is same as the refresh token attached in the user document
+        // This shows that the refresh token is used or not
+        // Once it is used, we are replacing it with new refresh token below
+        if (user.refreshToken !== inCommingRefreshToken) {
+            // token is valid but used
+            return res.status(401).json({
+                success: false,
+                message: "Refresh token expired"
+            })
+        }
+
+        const accessToken = user.generateAccessToken();
+        const newRefreshToken = user.generateRefreshToken();
+
+        user.refreshToken = newRefreshToken;
+        await user.save();
+
+        interface optionType {
+            httpOnly: boolean
+            maxAge: number
+            secure: boolean
+        }
+
+        const cookieOption: optionType = {
+            httpOnly: true,
+            maxAge: 1000 * 60 * 60 * 24,
+            secure: process.env.NODE_ENV === "production"
+        }
+
+        res.cookie("AccessToken", accessToken, cookieOption)
+        res.cookie("RefreshToken", newRefreshToken, cookieOption)
+
+        res.status(200).json({
+            success: true,
+            message: "Access Token Refreshed",
+            user
+        })
+    } catch (error) {
+        console.error("Error refreshing access token: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error refreshing access token"
         })
     }
 }

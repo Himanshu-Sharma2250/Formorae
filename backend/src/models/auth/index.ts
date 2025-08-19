@@ -39,7 +39,7 @@ const userSchema = new Schema(
         forgetPasswordToken: {
             type: String,
         },
-        forgotPasswordExpiry: {
+        forgetPasswordExpiry: {
             type: Date,
         },
         emailVerificationToken: {
@@ -67,8 +67,8 @@ interface IUserDocument extends Document {
     isVerified: boolean,
     role: string,
     refreshToken: string,
-    forgotPasswordToken: string | undefined
-    forgotPasswordExpiry: number | undefined
+    forgetPasswordToken: string | undefined
+    forgetPasswordExpiry: number | undefined
     emailVerificationToken: string | undefined,
     emailVerificationExpiry: number | undefined,
 
