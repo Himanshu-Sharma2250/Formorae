@@ -4,7 +4,6 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken"
 
 import { availableUserRoles, USER_TEMPORARY_TOKEN_EXPIRY, UserRolesEnum } from "../../constant.js";
-import { string } from "zod";
 
 const userSchema = new Schema(
     {

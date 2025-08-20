@@ -11,3 +11,11 @@ export const UserRolesEnum: user = {
 export const availableUserRoles = Object.values(UserRolesEnum);
 
 export const USER_TEMPORARY_TOKEN_EXPIRY = 20 * 60 * 1000;
+
+export const FORM_STATUS = {
+    DRAFT: "DRAFT",
+    PUBLISHED: "PUBLISHED",
+    COMPLETED: "COMPLETED"
+}
+
+export const availableFormStatus = Object.values(FORM_STATUS);
