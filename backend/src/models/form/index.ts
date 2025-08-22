@@ -29,7 +29,7 @@ const formSchema = new Schema(
             enum: availableFormStatus,
             required: true,
         },
-        sharableLink: {
+        slug: {
             type: String,
         },
         publishedAt: {
@@ -47,7 +47,7 @@ interface IFormDocument extends Document {
     // schema: JSON
     settings: JSON
     status: string
-    sharableLink: string
+    slug: string
     publishedAt: Date
 }
 

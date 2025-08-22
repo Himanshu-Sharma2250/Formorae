@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
+import crypto from "crypto";
 
 import { Form } from "../models/form/index.js";
 import { formSchema } from "../validators/form.validator.js";
+import { FORM_STATUS } from "../constant.js";
 
 export const createForm = async (req: Request, res: Response) => {
     const {data, error} = formSchema.safeParse(req.body);
@@ -203,5 +205,63 @@ export const updateForm = async (req:Request, res: Response) => {
             success: false,
             message: "Error updating form"
         })       
+    }
+}
+
+export const publishForm = async (req:Request, res: Response) => {
+    const {formId} = req.params;
+
+    if (!formId) {
+        return res.status(400).json({
+            success: false,
+            message: "FormID not present"
+        })
+    }
+
+    try {
+        const form = await Form.findById(formId);
+
+        if (!form) {
+            return res.status(404).json({
+                success: false,
+                message: "Form not found"
+            })
+        }
+
+        let slug;
+
+        if (!form.slug) {
+            slug = `${form.name.replace(/\s+/g, '-').toLowerCase()}-${crypto.randomBytes(3).toString('hex')}`;
+
+            const slugExists = await Form.findOne({slug});
+
+            if (slugExists) {
+                return res.status(400).json({
+                    success: false,
+                    message: "slug already exist"
+                })
+            }
+
+            form.slug = slug;
+        }
+
+        form.status = FORM_STATUS.PUBLISHED;
+        form.publishedAt = new Date();
+
+        await form.save();
+
+        const shareUrl = `${process.env.APP_BASE_URL}/f/${form.slug}`;
+
+        res.status(200).json({
+            success: true,
+            message: "Form published successfully",
+            shareUrl: shareUrl
+        })
+    } catch (error) {
+        console.error("Error publishing form: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error publishing form"
+        })      
     }
 }
