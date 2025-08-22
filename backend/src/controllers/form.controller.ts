@@ -133,3 +133,37 @@ export const getFormByID = async (req:Request, res:Response) => {
         })
     }
 }
+
+
+export const deleteForm = async (req: Request, res: Response) => {
+    const {formId} = req.params;
+
+    if (!formId) {
+        return res.status(400).json({
+            success: false,
+            message: "FormID not present"
+        })
+    }
+
+    try {
+        const deletedForm = await Form.findByIdAndDelete(formId);
+
+        if (!deletedForm) {
+            return res.status(404).json({
+                success: false,
+                message: "Form do not exist"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Form deleted Successfully"
+        })
+    } catch (error) {
+        console.error("Error deleting form: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error deleting form"
+        })        
+    }
+}
