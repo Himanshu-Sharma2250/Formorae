@@ -73,12 +73,29 @@ export const getForms = async (req: Request, res: Response) => {
         })
 
         if (!forms) {
-            return res.status(200).json({
+            return res.status(400).json({
                 success: false,
                 message: "Login first"
             })
         }
+
+        if (forms.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: "No Forms Present"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Getting Forms",
+            forms
+        })
     } catch (error) {
-        
+        console.error("Error getting forms: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error getting forms"
+        })
     }
 }
