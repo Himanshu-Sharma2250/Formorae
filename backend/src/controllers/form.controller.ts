@@ -167,3 +167,41 @@ export const deleteForm = async (req: Request, res: Response) => {
         })        
     }
 }
+
+export const updateForm = async (req:Request, res: Response) => {
+    const {formId} = req.params;
+    const data = req.body;
+
+    if (!formId) {
+        return res.status(400).json({
+            success: false,
+            message: "FormID not present"
+        })
+    }
+
+    try {
+        const form = await Form.findByIdAndUpdate(formId, 
+            {$set: data},
+            {new: true, runValidators: true}
+        )
+
+        if (!form) {
+            return res.status(404).json({
+                success: false,
+                message: "Form not found"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Form updated successfully",
+            form
+        })
+    } catch (error) {
+        console.error("Error updating form: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error updating form"
+        })       
+    }
+}
