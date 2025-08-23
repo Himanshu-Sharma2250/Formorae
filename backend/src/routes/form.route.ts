@@ -9,6 +9,6 @@ formRouter.get("/get-form", verifyJWT, getForms);
 formRouter.get("/get-form/:formId", verifyJWT, getFormByID);
 formRouter.delete("/delete-form/:formId", verifyJWT, deleteForm);
 formRouter.put("/update-form/:formId", verifyJWT, updateForm);
-formRouter.post("/forms/:formId/publish", verifyJWT, publishForm);
+formRouter.post("/publish/:formId", verifyJWT, publishForm);
 
 export default formRouter

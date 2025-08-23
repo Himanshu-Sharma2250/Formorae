@@ -17,11 +17,11 @@ const formSchema = new Schema(
             type: String,
         },
         schema: {
-            type: JSON,
+            type: Schema.Types.Mixed,
             required: true
         },
         settings: {
-            type: JSON,
+            type: Schema.Types.Mixed,
         },
         status: {
             type: String,
@@ -34,14 +34,13 @@ const formSchema = new Schema(
         },
         publishedAt: {
             type: Date,
-            required: true
         }
     },
     {timestamps: true}
 )
 
 interface IFormDocument extends Document {
-    userID: string
+    userId: string
     name: string
     description?: string
     // schema: JSON

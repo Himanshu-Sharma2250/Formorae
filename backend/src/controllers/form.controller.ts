@@ -37,13 +37,14 @@ export const createForm = async (req: Request, res: Response) => {
             name: name,
             description: description,
             schema: schema,
-            settings: settings
+            settings: settings,
+            userId: req.user?._id
         });
 
         await form.save();
 
         const createdForm = await Form.findOne({
-            userID: req.user?._id,
+            userId: req.user?._id,
             name: name
         })
 
@@ -250,7 +251,7 @@ export const publishForm = async (req:Request, res: Response) => {
 
         await form.save();
 
-        const shareUrl = `${process.env.APP_BASE_URL}/f/${form.slug}`;
+        const shareUrl = `${process.env.APP_BASE_URL as string}/f/${form.slug}`;
 
         res.status(200).json({
             success: true,
