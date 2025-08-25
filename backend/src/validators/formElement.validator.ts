@@ -10,3 +10,7 @@ export const elementSchema = z.object({
     conditionalLogic: z.json(),
     orderIndex: z.number()
 });
+
+export const getElementSchema = z.object({
+    formId: z.string()
+})

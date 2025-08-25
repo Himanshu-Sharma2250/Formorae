@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { elementSchema } from "../validators/formElement.validator.js"
+import { elementSchema, getElementSchema } from "../validators/formElement.validator.js"
 import { FormElement } from "../models/form_element/index.js";
 
 export const createFormElement = async (req:Request, res:Response) => {
@@ -67,5 +67,42 @@ export const createFormElement = async (req:Request, res:Response) => {
             success: false,
             message: "Error creating element"
         })
+    }
+}
+
+export const getElement = async (req:Request, res:Response) => {
+    const {data, error} = getElementSchema.safeParse(req.body);
+
+    if (error) {
+        console.error("Error in safeParse: ", error);
+        return res.status(400).json({
+            success: false,
+            message: "Error in safeParse"
+        })
+    }
+
+    const {formId} = data;
+
+    try {
+        const element = await FormElement.findById({formId});
+
+        if (!element) {
+            res.status(404).json({
+                success: false,
+                message: "element not found"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Element get successfull",
+            element
+        })
+    } catch (error) {
+        console.error("Error getting element: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error getting element"
+        })        
     }
 }
