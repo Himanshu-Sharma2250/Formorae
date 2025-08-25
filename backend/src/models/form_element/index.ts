@@ -7,11 +7,12 @@ const formElementSchema = new Schema(
             ref: "Form",
             required: true
         },
-        elementType: {
+        type: {
             type: String,
         },
         name: {
             type: String,
+            unique: true,
         },
         label: {
             type: String,
@@ -34,7 +35,7 @@ const formElementSchema = new Schema(
 
 interface IFormElementDocument extends Document {
     formId: number
-    elementType: string
+    type: string
     name: string
     label: string
     configuration: JSON
@@ -42,5 +43,7 @@ interface IFormElementDocument extends Document {
     conditionalLogic: JSON
     orderIndex: number
 }
+
+formElementSchema.index({ formId: 1, name: 1 }, { unique: true });
 
 export const FormElement = mongoose.model("FormElement", formElementSchema);
