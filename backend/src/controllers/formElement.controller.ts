@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { elementSchema, getElementSchema } from "../validators/formElement.validator.js"
+import { elementSchema, getElementSchema, updateElementSchema } from "../validators/formElement.validator.js"
 import { FormElement } from "../models/form_element/index.js";
 
 export const createFormElement = async (req:Request, res:Response) => {
@@ -108,7 +108,7 @@ export const getElement = async (req:Request, res:Response) => {
 }
 
 export const getElementById = async (req:Request, res:Response) => {
-    const {elementId} = req.params;
+    const {elementId} = req.body;
 
     try {
         const element = await FormElement.findById(elementId);
@@ -135,7 +135,7 @@ export const getElementById = async (req:Request, res:Response) => {
 }
 
 export const deleteElement = async (req:Request, res:Response) => {
-    const {elementId} = req.params;
+    const {elementId} = req.body;
 
     try {
         const element = await FormElement.findByIdAndDelete(elementId);
@@ -166,5 +166,46 @@ export const deleteElement = async (req:Request, res:Response) => {
             success: false,
             message: "Error deleting element"
         })
+    }
+}
+
+export const updateElement = async (req:Request, res:Response) => {
+    const {data, error} = updateElementSchema.safeParse(req.body);
+    const {elementId} = req.body;
+
+    if (error) {
+        console.error("Error in safeParse: ", error);
+        return res.status(400).json({
+            success: false,
+            message: "Error in safeParse"
+        })
+    }
+
+    try {
+        const element = await FormElement.findByIdAndUpdate(elementId, 
+            {
+                $set: data
+            },
+            {new: true, runValidators: true}
+        )
+
+        if (!element) {
+            return res.status(404).json({
+                success: false,
+                message: "Element not found"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Element updated successfully",
+            element
+        })
+    } catch (error) {
+        console.error("Error updating element: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error updating element"
+        })        
     }
 }
