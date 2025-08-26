@@ -76,7 +76,7 @@ export const getElement = async (req:Request, res:Response) => {
     const {formId} = req.params;
 
     try {
-        const element = await FormElement.findOne({formId:formId});
+        const element = await FormElement.find({formId:formId});
 
         if (!element) {
             res.status(404).json({

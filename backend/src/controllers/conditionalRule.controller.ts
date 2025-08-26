@@ -72,3 +72,30 @@ export const addConditionalRule = async (req:Request, res:Response) => {
         })
     }
 }
+
+export const getConditionalRules = async (req:Request, res:Response) => {
+    const {formId} = req.params;
+
+    try {
+        const rules = await ConditionalRules.find({formId:formId});
+
+        if (!rules) {
+            return res.status(404).json({
+                success: false,
+                message: "Rules not found"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Rules got",
+            rules
+        })
+    } catch (error) {
+        console.error("Error getting rules: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error getting rules"
+        })        
+    }
+}
