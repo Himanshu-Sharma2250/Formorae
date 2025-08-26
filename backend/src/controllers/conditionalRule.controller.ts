@@ -126,3 +126,52 @@ export const getConditionalRuleById = async (req:Request, res:Response) => {
         })
     }
 }
+
+export const updateRule = async (req:Request, res:Response) => {
+    const {data, error} = ruleSchema.safeParse(req.body);
+
+    if (error) {
+        console.error("Error in safeParse: ", error);
+        return res.status(400).json({
+            success: false,
+            message: "Error in safeParse"
+        })
+    }
+
+    const {ruleId} = req.params;
+
+    try {
+        const rule = await ConditionalRules.findByIdAndUpdate(ruleId,
+            {$set:data},
+            {new: true, runValidators: true}
+        )
+
+        if (!rule) {
+            return res.status(404).json({
+                success: false,
+                message: "Rule not found to update"
+            })
+        }
+
+        const updatedRule = await ConditionalRules.findById(ruleId);
+
+        if (!updateRule) {
+            return res.status(400).json({
+                success: false,
+                message: "Rule not updated"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Rule updated successfully",
+            rule
+        })
+    } catch (error) {
+        console.error("Error updating rule: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error updating rule"
+        })
+    }
+}
