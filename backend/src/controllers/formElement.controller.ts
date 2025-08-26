@@ -106,3 +106,31 @@ export const getElement = async (req:Request, res:Response) => {
         })        
     }
 }
+
+export const getElementById = async (req:Request, res:Response) => {
+    const {elementId} = req.params;
+
+    try {
+        const element = await FormElement.findById(elementId);
+
+        if (!element) {
+            return res.status(404).json({
+                success: false,
+                message: "Element not found"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Element get successfull",
+            element
+        })
+    } catch (error) {
+        console.error("Error getting element by id: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error getting element by id"
+        })        
+    }
+}
+
