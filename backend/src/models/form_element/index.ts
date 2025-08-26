@@ -20,7 +20,7 @@ const formElementSchema = new Schema(
         configuration: {
             type: Schema.Types.Mixed,
         },
-        validationTypes: {
+        validationRules: {
             type: Schema.Types.Mixed,
         },
         conditionalLogic: {
@@ -39,7 +39,7 @@ interface IFormElementDocument extends Document {
     name: string
     label: string
     configuration: JSON
-    validationTypes: JSON
+    validationRules: JSON
     conditionalLogic: JSON
     orderIndex: number
 }

@@ -1,7 +1,6 @@
 import z from "zod";
 
 export const elementSchema = z.object({
-    formId: z.string(),
     type: z.string(),
     name: z.string(),
     label: z.string(),
@@ -10,10 +9,6 @@ export const elementSchema = z.object({
     conditionalLogic: z.json(),
     orderIndex: z.number()
 });
-
-export const getElementSchema = z.object({
-    formId: z.string()
-})
 
 export const updateElementSchema = z.object({
     type: z.string().optional(),

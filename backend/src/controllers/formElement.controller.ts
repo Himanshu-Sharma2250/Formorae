@@ -1,9 +1,10 @@
 import { Request, Response } from "express"
-import { elementSchema, getElementSchema, updateElementSchema } from "../validators/formElement.validator.js"
+import { elementSchema, updateElementSchema } from "../validators/formElement.validator.js"
 import { FormElement } from "../models/form_element/index.js";
 
 export const createFormElement = async (req:Request, res:Response) => {
     const {data, error} = elementSchema.safeParse(req.body);
+    const {formId} = req.params;
 
     if (error) {
         console.error("Error in safeParse: ", error);
@@ -13,7 +14,7 @@ export const createFormElement = async (req:Request, res:Response) => {
         })
     }
 
-    const {formId, type, name, label, configuration, conditionalLogic, orderIndex} = data;
+    const {type, name, label, configuration, conditionalLogic, validationRules, orderIndex} = data;
 
     try {
         const existingElement = await FormElement.findOne({formId:formId, name:name});
@@ -31,6 +32,7 @@ export const createFormElement = async (req:Request, res:Response) => {
             type: type,
             label: label,
             configuration: configuration,
+            validationRules: validationRules,
             conditionalLogic: conditionalLogic,
             orderIndex: orderIndex
         });
@@ -71,20 +73,10 @@ export const createFormElement = async (req:Request, res:Response) => {
 }
 
 export const getElement = async (req:Request, res:Response) => {
-    const {data, error} = getElementSchema.safeParse(req.body);
-
-    if (error) {
-        console.error("Error in safeParse: ", error);
-        return res.status(400).json({
-            success: false,
-            message: "Error in safeParse"
-        })
-    }
-
-    const {formId} = data;
+    const {formId} = req.params;
 
     try {
-        const element = await FormElement.findById({formId});
+        const element = await FormElement.findOne({formId:formId});
 
         if (!element) {
             res.status(404).json({
@@ -108,7 +100,7 @@ export const getElement = async (req:Request, res:Response) => {
 }
 
 export const getElementById = async (req:Request, res:Response) => {
-    const {elementId} = req.body;
+    const {elementId} = req.params;
 
     try {
         const element = await FormElement.findById(elementId);
@@ -135,7 +127,7 @@ export const getElementById = async (req:Request, res:Response) => {
 }
 
 export const deleteElement = async (req:Request, res:Response) => {
-    const {elementId} = req.body;
+    const {elementId} = req.params;
 
     try {
         const element = await FormElement.findByIdAndDelete(elementId);
@@ -171,7 +163,7 @@ export const deleteElement = async (req:Request, res:Response) => {
 
 export const updateElement = async (req:Request, res:Response) => {
     const {data, error} = updateElementSchema.safeParse(req.body);
-    const {elementId} = req.body;
+    const {elementId} = req.params;
 
     if (error) {
         console.error("Error in safeParse: ", error);
