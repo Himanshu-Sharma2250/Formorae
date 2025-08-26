@@ -99,3 +99,30 @@ export const getConditionalRules = async (req:Request, res:Response) => {
         })        
     }
 }
+
+export const getConditionalRuleById = async (req:Request, res:Response) => {
+    const {ruleId} = req.params;
+
+    try {
+        const rule = await ConditionalRules.findById(ruleId);
+
+        if (!rule) {
+            return res.status(404).json({
+                success: false,
+                message: "Rule not found"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Rule got by id",
+            rule
+        })
+    } catch (error) {
+        console.error("Error getting rule by id: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error getting rule by id"
+        })
+    }
+}
