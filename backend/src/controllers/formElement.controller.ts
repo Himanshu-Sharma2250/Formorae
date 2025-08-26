@@ -134,3 +134,37 @@ export const getElementById = async (req:Request, res:Response) => {
     }
 }
 
+export const deleteElement = async (req:Request, res:Response) => {
+    const {elementId} = req.params;
+
+    try {
+        const element = await FormElement.findByIdAndDelete(elementId);
+
+        if (!element) {
+            return res.status(404).json({
+                success: false,
+                message: "Element not found"
+            })
+        }
+
+        const deletedElement = await FormElement.findById(elementId);
+
+        if (deletedElement) {
+            return res.status(400).json({
+                success: false,
+                message: "Element not deleted"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Element deleted successfully"
+        })
+    } catch (error) {
+        console.error("Error deleting element: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error deleting element"
+        })
+    }
+}
