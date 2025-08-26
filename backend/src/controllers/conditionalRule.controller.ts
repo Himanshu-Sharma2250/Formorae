@@ -139,13 +139,13 @@ export const updateRule = async (req:Request, res:Response) => {
     }
 
     const {ruleId} = req.params;
-
+    
     try {
         const rule = await ConditionalRules.findByIdAndUpdate(ruleId,
             {$set:data},
             {new: true, runValidators: true}
         )
-
+        
         if (!rule) {
             return res.status(404).json({
                 success: false,
@@ -161,7 +161,7 @@ export const updateRule = async (req:Request, res:Response) => {
                 message: "Rule not updated"
             })
         }
-
+        
         res.status(200).json({
             success: true,
             message: "Rule updated successfully",
@@ -172,6 +172,43 @@ export const updateRule = async (req:Request, res:Response) => {
         res.status(500).json({
             success: false,
             message: "Error updating rule"
+        })
+    }
+}
+
+export const deleteRule = async (req:Request, res:Response) => {
+    const {ruleId} = req.params;
+
+    try {
+        const rule = await ConditionalRules.findByIdAndDelete(ruleId);
+
+        if (!rule) {
+            return res.status(404).json({
+                success: false,
+                message: "Rule not found to delete"
+            })
+        }
+
+        console.log("deleted Rule : ", rule);
+
+        const deletedRule = await ConditionalRules.findById(ruleId);
+
+        if (deletedRule) {
+            return res.status(400).json({
+                success: false,
+                message: "Rule not deleted"
+            })
+        }
+
+        res.status(200).json({
+            success: false,
+            message: "Rule deleted successfully"
+        })
+    } catch (error) {
+        console.error("Error deleting rule: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error deleting rule"
         })
     }
 }
