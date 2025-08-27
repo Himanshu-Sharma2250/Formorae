@@ -24,4 +24,4 @@ interface IResponseDocument {
     metaData: JSON
 }
 
-export const Response = mongoose.model("Response", responseSchema);
+export const ResponseTable = mongoose.model("ResponseTable", responseSchema);

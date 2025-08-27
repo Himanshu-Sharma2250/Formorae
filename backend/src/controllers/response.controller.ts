@@ -1,8 +1,8 @@
-import { Request, Response as res } from "express";
+import { Request, Response } from "express";
 import { responseSchema } from "../validators/response.validator.js";
-import { Response } from "../models/form_response/index.js";
+import { ResponseTable } from "../models/form_response/index.js";
 
-export const createResponse = async (req: Request, res: res) => {
+export const createResponse = async (req: Request, res: Response) => {
     const {data, error} = responseSchema.safeParse(req.body);
 
     if (error) {
@@ -17,7 +17,7 @@ export const createResponse = async (req: Request, res: res) => {
     const {formId} = req.params;
 
     try {
-        const response = await Response.create({
+        const response = await ResponseTable.create({
             formId:formId,
             responseData:responseData,
             metaData:metaData
@@ -44,4 +44,33 @@ export const createResponse = async (req: Request, res: res) => {
             message: "Error recorded response"
         })
     }    
+}
+
+export const getResponses = async (req: Request, res: Response) => {
+    const {formId} = req.params;
+
+    try {
+        const responses = await ResponseTable.find({
+            formId:formId
+        });
+
+        if (!responses) {
+            return res.status(404).json({
+                success: false,
+                message: "Response not found"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Responses are ",
+            responses
+        })
+    } catch (error) {
+        console.error("Error getting responses: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error getting responses"
+        })        
+    }
 }
