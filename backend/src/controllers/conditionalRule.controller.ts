@@ -35,7 +35,7 @@ export const addConditionalRule = async (req:Request, res:Response) => {
             target_element_id:target_element_id,
             actionType:actionType,
             conditionType:conditionType,
-            conditionValue:conditionType
+            conditionValue:conditionValue
         })
 
         if (!rule) {
