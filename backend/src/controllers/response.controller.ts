@@ -101,3 +101,38 @@ export const getResponseById = async (req: Request, res: Response) => {
         })
     }
 }
+
+export const deleteResponse = async (req: Request, res: Response) => {
+    const {responseId} = req.params;
+
+    try {
+        const response = await ResponseTable.findByIdAndDelete(responseId);
+
+        if (!response) {
+            return res.status(404).json({
+                success: false,
+                message: "Response not found"
+            })
+        }
+
+        const deletedResponse = await ResponseTable.findById(responseId);
+
+        if (deletedResponse) {
+            return res.status(400).json({
+                success: false,
+                message: "Response not deleted"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Response deleted successfully"
+        })
+    } catch (error) {
+        console.error("Error deleting response: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error deleting response"
+        })
+    }
+}
