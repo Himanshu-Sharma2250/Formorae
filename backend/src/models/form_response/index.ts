@@ -12,7 +12,7 @@ const responseSchema = new Schema(
             required: true
         },
         metaData: {
-            type: Schema.Types.ObjectId
+            type: Schema.Types.Mixed
         },
     },
     {timestamps: {createdAt: 'submitted_at', updatedAt: 'updated_at'}}
