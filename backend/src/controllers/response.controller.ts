@@ -63,7 +63,7 @@ export const getResponses = async (req: Request, res: Response) => {
 
         res.status(200).json({
             success: true,
-            message: "Responses are ",
+            message: "Responses found ",
             responses
         })
     } catch (error) {
@@ -72,5 +72,32 @@ export const getResponses = async (req: Request, res: Response) => {
             success: false,
             message: "Error getting responses"
         })        
+    }
+}
+
+export const getResponseById = async (req: Request, res: Response) => {
+    const {responseId} = req.params;
+
+    try {
+        const response = await ResponseTable.findById(responseId);
+
+        if (!response) {
+            return res.status(404).json({
+                success: false,
+                message: "Response not found"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Response found by id",
+            response
+        })
+    } catch (error) {
+        console.error("Error getting response: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Error getting response"
+        })
     }
 }
