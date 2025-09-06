@@ -1,13 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
+// import NavBar from "../components/NavBar.js"
+import LandingPage from '../pages/LandingPage.js'
 
 export const Route = createFileRoute("/")({
-  component: Index,
+    component: Index,
 })
 
 function Index() {
-  return (
-    <div className="p-2">
-      <h3>Welcome Home!</h3>
-    </div>
-  )
+    return (
+        <LandingPage/>
+    )
 }
