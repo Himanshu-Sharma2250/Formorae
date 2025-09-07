@@ -31,7 +31,7 @@ const Dashboard = () => {
                         <div className="border-b-2 border-gray-200 mb-3"></div>
 
                         {/* contains all the forms created till now */}
-                        <div className="border-2 flex justify-between items-center px-2 py-2 rounded-[5px]">
+                        <div className="border-2 flex justify-between items-center px-2 py-2 rounded-[5px] cursor-pointer hover:bg-gray-100">
                             {/* div-1 contains form's name, no of submissions and published / edited date */}
                             <div>
                                 <h1 className="flex items-center gap-2">

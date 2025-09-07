@@ -19,6 +19,10 @@ const RootLayout = () => (
             <Link to="/dashboard">
                 dashboard
             </Link>{' '}
+
+            <Link to="/forms/$fid" params={{fid: 'dn465'}}>
+                submission
+            </Link>{' '}
         </div>
         <hr />
         <Outlet />

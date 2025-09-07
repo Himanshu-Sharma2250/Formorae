@@ -13,6 +13,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FormsFidRouteImport } from './routes/forms/$fid'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -34,18 +35,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FormsFidRoute = FormsFidRouteImport.update({
+  id: '/forms/$fid',
+  path: '/forms/$fid',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/forms/$fid': typeof FormsFidRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/forms/$fid': typeof FormsFidRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/forms/$fid': typeof FormsFidRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/signin' | '/signup'
+  fullPaths: '/' | '/dashboard' | '/signin' | '/signup' | '/forms/$fid'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/signin' | '/signup'
-  id: '__root__' | '/' | '/dashboard' | '/signin' | '/signup'
+  to: '/' | '/dashboard' | '/signin' | '/signup' | '/forms/$fid'
+  id: '__root__' | '/' | '/dashboard' | '/signin' | '/signup' | '/forms/$fid'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +76,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
+  FormsFidRoute: typeof FormsFidRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forms/$fid': {
+      id: '/forms/$fid'
+      path: '/forms/$fid'
+      fullPath: '/forms/$fid'
+      preLoaderRoute: typeof FormsFidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
+  FormsFidRoute: FormsFidRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
