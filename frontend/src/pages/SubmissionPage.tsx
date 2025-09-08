@@ -1,4 +1,6 @@
 import { Pencil, Share2 } from "lucide-react";
+import { useState } from "react";
+
 import DashNav from "../components/DashNav";
 import SideBar from "../components/SideBar";
 import SummarySection from "../components/SummarySection";
@@ -6,6 +8,14 @@ import SubmissionSection from "../components/SubmissionSection";
 import ShareSection from "../components/ShareSection";
 
 const SubmissionPage = () => {
+    const [activeSection, setActiveSection] = useState('');
+
+    function on_click(e: React.MouseEvent<HTMLButtonElement>) {
+        const button = e.target as HTMLButtonElement;
+        setActiveSection(button.innerText);
+        console.log("current section: ", activeSection);
+    }
+
     return (
         <div className="w-[100vw] h-full flex font-mono">
             <SideBar/>
@@ -45,15 +55,15 @@ const SubmissionPage = () => {
                         <div className="px-2 flex flex-col">
                             {/* contains all the buttons */}
                             <div className="flex gap-2.5">
-                                <button className="cursor-pointer border-b-2 border-gray-50 hover:border-black">
+                                <button className={`cursor-pointer border-b-2 ${activeSection === "Summary" ? "border-gray-950" : "border-gray-50"} hover:border-black`} onClick={on_click}>
                                     Summary
                                 </button>
 
-                                <button className="cursor-pointer border-b-2 border-gray-50 hover:border-black">
+                                <button className={`cursor-pointer border-b-2 ${activeSection === "Submissions" ? "border-gray-950" : "border-gray-50"} hover:border-black`} onClick={on_click}>
                                     Submissions
                                 </button>
 
-                                <button className="cursor-pointer border-b-2 border-gray-50 hover:border-black">
+                                <button className={`cursor-pointer border-b-2 ${activeSection === "Share" ? "border-gray-950" : "border-gray-50"} hover:border-black`} onClick={on_click}>
                                     Share
                                 </button>
                             </div>
@@ -63,9 +73,7 @@ const SubmissionPage = () => {
                         </div>
                         
                         {/* when we click on the buttons it will show particular section */}
-                        {/* <SummarySection/> */}
-                        {/* <SubmissionSection/> */}
-                        <ShareSection/>
+                        {activeSection === 'Summary' ? <SummarySection/> : activeSection === 'Submissions' ? <SubmissionSection/> : <ShareSection/>}
                     </main>
                 </div>
             </div>
