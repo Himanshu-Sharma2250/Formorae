@@ -2,7 +2,7 @@ import { PanelLeftClose, PanelLeftOpen, ChevronDown, Search, Settings, CircleArr
 
 const SideBar = () => {
     return (
-        <div className="h-[80vh] w-3xs py-2">
+        <div className="h-[94.1vh] w-3xs py-2"> {/* height will be changed */}
             {/* contains username and button to close the sidebar */}
             <div className='flex items-center justify-between px-2.5 border-0'>
                 <div className='flex items-center justify-between'>
